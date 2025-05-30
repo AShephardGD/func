@@ -1,14 +1,11 @@
-;E    :=  E OPT1 T1 |  T1
-;T1   := T1 OPT2 T2 |  T2
-
-
-E    :=   T1 E'                                                       ; Not counts
-E'   :=   +T1 E'   |  -T1 E'  |  eps                                  ; Counts
-E' got lf, lf ops with T1 and then push it to E'
-T1   :=   T2 T1'                                                      ; Not counts
-T1'  :=   *T2 T1'  |  /T2 T1' |  ^T2 T1'  |  %T2 T1'  |  eps          ; Counts
-T2   :=  -T3       |  T3      |  |T3|     |  T3!                      ;
-T3   :=   N        |  (E)     |  lg(E)    |  ln(E)    |  (E)log(E)  | ;
-          sin(E)   |  cos(E)  |  tg(E)    | arcsin(E) |  arccos(E)  | ;
-          arctg(E) |  d/dx(E) |  fn(E)                                ;
-N    :=   num      |  pi      |  e        |  x                        ;
+E    :=   T1 E'
+E'   :=   +T1 E'   |  -T1 E'  |  eps
+T1   :=   T2 T1'
+T1'  :=   *T2 T1'  |  /T2 T1' |  ^T2 T1'  |  %T2 T1'  |  eps
+T2   :=  T21 T3 T22
+T21  :=  -T21      |  eps
+T22  :=  !T22      |  eps
+T3   :=   N        |  (E)     |  lg(E)    |  ln(E)    |  (E)log(E)  |
+          sin(E)   |  cos(E)  |  tg(E)    | arcsin(E) |  arccos(E)  |
+          arctg(E) |  d/dx(E) |  fn(E)    |  |E|
+N    :=   num      |  pi      |  e        |  x
