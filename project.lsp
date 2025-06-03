@@ -22,9 +22,25 @@
 
 
 
-(defun factorial
- (n)
- (cond
+(defun errorIndex; Name
+ (index)         ; Args
+ (cond           ; Correct the index for correct error output
+  (
+   (eq index 0)
+   index
+  )
+  (
+   T
+   (1- index)
+  )
+ )
+)
+
+
+
+(defun factorial           ; Name
+ (n)                       ; Args
+ (cond                     ; Counts factorial
   (
    (< n 2)
    1
@@ -34,6 +50,67 @@
    (* n (factorial (1- n)))
   )
  )
+)
+
+
+
+(defun digitChar      ; Name
+ (char)               ; Args
+ (cond                ; digit-char-p with char error handling
+  (
+   char
+   (digit-char-p char)
+  )
+  (
+   T
+   nil
+  )
+ )
+)
+
+(defun charWOlen                ; Name
+ (input index)                  ; Args
+ (cond                          ; char with index error handling
+  (
+   (< (length input) (1+ index))
+   nil
+  )
+  (
+   T
+   (char input index)
+  )
+ )
+)
+
+(defun subseqWOlen            ; Name
+ (input start end)            ; Args
+ (cond                        ; subseq with index error handling
+  (
+   (< (length input) (1+ end))
+   nil
+  )
+  (
+   T
+   (subseq input start end)
+  )
+ )
+)
+
+
+
+(defun derivative
+ (inputList functions)
+ nil
+)
+
+(defun checkFunction
+ (inputList functions)
+ nil
+)
+
+(defun executeFunction
+ (inputList functions)
+ nil
 )
 
 
@@ -62,82 +139,355 @@
  )
 )
 
-(defun N                                                                   ; Name, returns (input, index, error, res)
- (inputList negDegree)                                                     ; Args
+(defun N                                                                 ; Name, returns (input, index, error, res)
+ (inputList negDegree)                                                   ; Args
  (let
   (
    (input (car inputList))
    (index (cadr inputList))
    (error (caddr inputList))
    (lf (cdddr inputList))
-  ); Number grammar rule
+  )                                                                      ; Number grammar rule
   (cond
    (
-    error                                                                  ; If error
-    inputList                                                              ; Return error, nothing done
+    error                                                                ; If error
+    inputList                                                            ; Return error, nothing done
    )
    (
-    (eq index (length input))                                              ; End of input
-    (cond
-     (
-      lf                                                                   ; There is a number
-      (set4 inputList (/ (NChange lf) (expt 10 (NNegDegreeSF1 negDegree)))); Return number
-     )
-     (
-      T                                                                    ; No number at the end of input
-      (set3 inputList "There is no number.")                               ; Return error
-     )
-    )
-   )
-   (
-    (digit-char-p (char input index))                                      ; If digit
-    (N                                                                     ; Read next char 
+    (digitChar (charWOlen input index))                                  ; If digit
+    (N                                                                   ; Read next char 
      (set4 (set2 inputList (1+ index))
-     (+ (* (NChange lf) 10) (digit-char-p (char input index))))
+     (+ (* (NChange lf) 10) (digitChar (char input index))))
      (NNegDegreeSF2 negDegree)
     )
    )
    (
-    (eq #\. (char input index))                                            ; If dot
+    (eq #\. (charWOlen input index))                                     ; If dot
     (cond
      (
-      (minusp negDegree)                                                   ; If there is no degree
-      (N (set2 inputList (1+ index)) 0)                                    ; Make degree
+      (minusp negDegree)                                                 ; If there is no degree
+      (N (set2 inputList (1+ index)) 0)                                  ; Make degree
      )
      (
-      T                                                                    ; If there is a degree
-      (set3 inputList "Too many dots...")                                  ; Return error
+      T                                                                  ; If there is a degree
+      (set3 inputList "Too many dots...")                                ; Return error
      )
     )
    )
    (
-    (eq #\e (char input index))                                            ; If e
-    (set4 (set2 inputList (1+ index)) (exp 1))                             ; Return Euler constant
+    (eq #\e (charWOlen input index))                                     ; If e
+    (set4 (set2 inputList (1+ index)) (exp 1))                           ; Return Euler constant
    )
    (
-    (< (+ index 1) (length input))                                         ; If more than 2 chars left and no digits or e or dot
-    (cond
+    (string= "pi" (subseqWOlen input index (+ 2 index)))                 ; If pi
+    (set4 (set2 inputList (+ index 2)) pi)                               ; Return pi
+   )
+   (
+    lf                                                                   ; Other char and there is a number
+    (set4 inputList (/ (NChange lf) (expt 10 (NNegDegreeSF1 negDegree)))); Return number
+   )
+   (
+    T                                                                    ; Other char and there is no number
+    (set3 inputList "There is no number.")                               ; Return error
+   )
+  )
+ )
+)
+
+
+
+(defun T3                                                                      ; Name
+ (inputList functions)                                                         ; Args
+ (let
+  (
+   (input (car inputList))
+   (index (cadr inputList))
+   (error (caddr inputList))
+  )
+  (cond
+   (
+    error                                                                      ; If error
+    inputList                                                                  ; Return error
+   )
+   (
+    (eq #\( (charWOlen input index))                                           ; If openning bracket
+    (let*
      (
-      (string= "pi" (subseq input index (+ 2 index)))                      ; If pi
-      (set4 (set2 inputList (+ index 2)) pi)                               ; Return pi
+      (ERes (E (set2 inputList (1+ index)) functions))
+      (EResIndex (cadr ERes))
      )
-     (
-      lf                                                                   ; If there is a number
-      (set4 inputList (/ (NChange lf) (expt 10 (NNegDegreeSF1 negDegree)))); Return number
-     )
-     (
-      T                                                                    ; If there is no number
-      (set3 inputList "There is no number.")                               ; Return error
+     (cond
+      (
+       (caddr ERes)                                                            ; If error
+       ERes                                                                    ; Return error
+      )
+      (
+       (string= ")log(" (subseqWOlen input EResIndex (+ 5 EResIndex)))         ; Logarithm
+       (let ((E2Res (E (set2 ERes (+ 5 EResIndex)) functions)))
+        (cond
+         (
+          (caddr ERes)                                                         ; If error
+          E2Res                                                                ; Return error
+         )
+         (
+          (= 1 (cdddr E2Res))                                                  ; If base equals one
+          (set3 E2Res "Base can not be 1.")                                    ; Return error
+         )
+         (
+          (>= 0 (cdddr ERes))                                                  ; If number below or equals zero
+          (set3 ERes "Number must be positive.")                               ; Return error
+         )
+         (
+          (>= 0 (cdddr E2Res))                                                 ; If base below or equals zero
+          (set3 E2Res "Base must be positive.")                                ; Return error
+         )
+         (
+          (eq #\) (charWOlen input (cadr E2Res)))                              ; If closing bracket
+          (set2 (set4 ERes (log (cdddr ERes) (cdddr E2Res))) (1+ (cadr E2Res))); Return res
+         )
+         (
+          T                                                                    ; Other char
+          (set3 E2Res "There is no closing brackets.")                         ; Return error
+         )
+        )
+       )
+      )
+      (
+       (eq #\) (charWOlen input EResIndex))                                    ; If closing bracket
+       (set2 ERes (1+ EResIndex))                                              ; Return res
+      )
+      (
+       T                                                                       ; Other char
+       (set3 ERes "There is no closing brackets.")                             ; Return error
+      )
      )
     )
    )
    (
-    lf                                                                     ; Other char and there is a number
-    (set4 inputList (/ (NChange lf) (expt 10 (NNegDegreeSF1 negDegree))))  ; Return number
+    (string= "lg(" (subseqWOlen input index (+ 3 index)))                      ; Logarithm with base 10
+    (let ((ERes (E (set2 inputList (+ 3 index)) functions)))
+     (cond
+      (
+       (caddr ERes)                                                            ; If error
+       ERes                                                                    ; Return error
+      )
+      (
+       (>= 0 (cdddr ERes))                                                     ; If number below or equals zero
+       (set3 ERes "Number must be positive.")                                  ; Return error
+      )
+      (
+       (eq #\) (charWOlen input (cadr ERes)))                                  ; If closing brackets
+       (set2 (set4 ERes (log (cdddr ERes) 10)) (1+ (cadr ERes)))               ; Return res
+      )
+      (
+       T                                                                       ; Other char
+       (set3 ERes "There is no closing brackets.")                             ; Return error
+      )
+     )
+    )
    )
    (
-    T                                                                      ; Other char and there is no number
-    (set3 inputList "There is no number.")                                 ; Return error
+   (string= "ln(" (subseqWOlen input index (+ 3 index)))                       ; Logarithm with base e
+    (let ((ERes (E (set2 inputList (+ 3 index)) functions)))
+     (cond
+      (
+       (caddr ERes)                                                            ; If error
+       ERes                                                                    ; Return error
+      )
+      (
+       (>= 0 (cdddr ERes))                                                     ; If number below or equals zero
+       (set3 ERes "Number must be positive.")                                  ; Return error
+      )
+      (
+       (eq #\) (charWOlen input (cadr ERes)))                                  ; If closing bracket
+       (set2 (set4 ERes (log (cdddr ERes))) (1+ (cadr ERes)))                  ; Return res
+      )
+      (
+       T                                                                       ; Other char
+       (set3 ERes "There is no closing brackets.")                             ; Return error
+      )
+     )
+    )
+   )
+   (
+    (string= "sin(" (subseqWOlen input index (+ 4 index)))                     ; Sine
+    (let ((ERes (E (set2 inputList (+ 4 index)) functions)))
+     (cond
+      (
+       (caddr ERes)                                                            ; If error
+       ERes                                                                    ; Return error
+      )
+      (
+       (eq #\) (charWOlen input (cadr ERes)))                                  ; If closing bracket
+       (set2 (set4 ERes (sin (cdddr ERes))) (1+ (cadr ERes)))                  ; Return res
+      )
+      (
+       T                                                                       ; Other char
+       (set3 ERes "There is no closing brackets.")                             ; Return res
+      )
+     )
+    )
+   )
+   (
+    (string= "cos(" (subseqWOlen input index (+ 4 index)))                     ; Cosine
+    (let ((ERes (E (set2 inputList (+ 4 index)) functions)))
+     (cond
+      (
+       (caddr ERes)                                                            ; If error
+       ERes                                                                    ; Return error
+      )
+      (
+       (eq #\) (charWOlen input (cadr ERes)))                                  ; If closing bracket
+       (set2 (set4 ERes (cos (cdddr ERes))) (1+ (cadr ERes)))                  ; Return res
+      )
+      (
+       T                                                                       ; Other char
+       (set3 ERes "There is no closing brackets.")                             ; Return error
+      )
+     )
+    )
+   )
+   (
+    (string= "tg(" (subseqWOlen input index (+ 3 index)))                      ; Tangent
+    (let ((ERes (E (set2 inputList (+ 3 index)) functions)))
+     (cond
+      (
+       (caddr ERes)                                                            ; If error
+       ERes                                                                    ; Return error
+      )
+      (
+       (= (/ pi 2) (mod (cdddr ERes) pi))                                      ; If arg equals pi/2 + pik
+       (set3 ERes "tan(+-pi/2) is undefined.")                                 ; Return error
+      )
+      (
+       (eq #\) (charWOlen input (cadr ERes)))                                  ; If closing bracket
+       (set2 (set4 ERes (tan (cdddr ERes))) (1+ (cadr ERes)))                  ; Return res
+      )
+      (
+       T                                                                       ; Other char
+       (set3 ERes "There is no closing brackets.")                             ; Return error
+      )
+     )
+    )
+   )
+   (
+    (string= "arcsin(" (subseqWOlen input index (+ 7 index)))                  ; Arcsine
+    (let ((ERes (E (set2 inputList (+ 7 index)) functions)))
+     (cond
+      (
+       (caddr ERes)                                                            ; If error
+       ERes                                                                    ; Return error
+      )
+      (
+       (< 1 (cdddr ERes))                                                      ; If arg over one
+       (set3 ERes "The number should be in [-1, 1].")                          ; Return error
+      )
+      (
+       (> -1 (cdddr ERes))                                                     ; If arg below minus one
+       (set3 ERes "The number should be in [-1, 1].")                          ; Return error
+      )
+      (
+       (eq #\) (charWOlen input (cadr ERes)))                                  ; If closing bracket
+       (set2 (set4 ERes (asin (cdddr ERes))) (1+ (cadr ERes)))                 ; Return res
+      )
+      (
+       T                                                                       ; Other char
+       (set3 ERes "There is no closing brackets.")                             ; Return error
+      )
+     )
+    )
+   )
+   (
+    (string= "arccos(" (subseqWOlen input index (+ 7 index)))                  ; Arccosine
+    (let ((ERes (E (set2 inputList (+ 7 index)) functions)))
+     (cond
+      (
+       (caddr ERes)                                                            ; If error
+       ERes                                                                    ; Return error
+      )
+      (
+       (< 1 (cdddr ERes))                                                      ; If arg over one
+       (set3 ERes "The number should be in [-1, 1].")                          ; Return error
+      )
+      (
+       (> -1 (cdddr ERes))                                                     ; If arg below minus one
+       (set3 ERes "The number should be in [-1, 1].")                          ; Return error
+      )
+      (
+       (eq #\) (charWOlen input (cadr ERes)))                                  ; If closing bracket
+       (set2 (set4 ERes (acos (cdddr ERes))) (1+ (cadr ERes)))                 ; Return res
+      )
+      (
+       T                                                                       ; Other char
+       (set3 ERes "There is no closing brackets.")                             ; Return error
+      )
+     )
+    )
+   )
+   (
+    (string= "arctg(" (subseqWOlen input index (+ 6 index)))                   ; Arctangent
+    (let ((ERes (E (set2 inputList (+ 6 index)) functions)))
+     (cond
+      (
+       (caddr ERes)                                                            ; If error
+       ERes                                                                    ; Return error
+      )
+      (
+       (eq #\) (charWOlen input (cadr ERes)))                                  ; If closing bracket
+       (set2 (set4 ERes (atan (cdddr ERes))) (1+ (cadr ERes)))                 ; Return res
+      )
+      (
+       T                                                                       ; Other char
+       (set3 ERes "There is no closing brackets.")                             ; Return error
+      )
+     )
+    )
+   )
+   (
+    (string= "d/dx(" (subseqWOlen input index (+ 5 index)))                    ; Derivative
+    (let ((ERes (E (set2 inputList (+ 5 index)) functions)))
+     (cond
+      (
+       (caddr ERes)                                                            ; If error
+       ERes                                                                    ; Return error
+      )
+      (
+       (eq #\) (charWOlen input (cadr ERes)))                                  ; If closing bracket
+       (set2 (set4 ERes (derivative (cdddr ERes))) (1+ (cadr ERes)))           ; Return res
+      )
+      (
+       T                                                                       ; Other char
+       (set3 ERes "There is no closing brackets.")                             ; Return error
+      )
+     )
+    )
+   )
+   (
+    (eq #\| (charWOlen input index))                                           ; Absolute value
+    (let ((ERes (E (set2 inputList (1+ index)) functions)))
+     (cond
+      (
+       (caddr ERes)                                                            ; If error
+       ERes                                                                    ; Return error
+      )
+      (
+       (eq #\| (charWolen input (cadr ERes)))                                  ; If closing line
+       (set2 (set4 ERes (abs (cdddr ERes))) (1+ (cadr ERes)))                  ; Return res
+      )
+      (
+       T                                                                       ; Other char
+       (set3 ERes "There is no closing brackets.")                             ; Return error
+      )
+     )
+    )
+   )
+   (
+    (checkFunction inputList functions)                                        ; If custom function
+    (executeFunction inputList functions)                                      ; Execute custom function
+   )
+   (
+    T                                                                          ; Number?
+    (N (set4 inputList nil) -1)
    )
   )
  )
@@ -160,11 +510,7 @@
     inputList                                                ; Return error
    )
    (
-    (eq index (length input))                                ; End of input
-    inputList                                                ; Epsilon, nothing done
-   )
-   (
-    (eq #\! (char input index))
+    (eq #\! (charWOlen input index))
     (cond
      (
       (minusp lf)                                            ; If number is negative
@@ -179,6 +525,10 @@
       (set3 inputList "Factor number can not be non integer"); Return error
      )
     )
+   )
+   (
+    T                                                        ; Other char
+    inputList                                                ; Epsilon, nothing done
    )
   )
  )
@@ -201,7 +551,7 @@
     inputList                                                ; Return error
    )
    (
-    (eq #\- (char input index))                              ; If there is a minus
+    (eq #\- (charWOlen input index))                         ; If there is a minus
     (T21 (set2 (set4 inputList (- lf)) (1+ index)) functions); Change sign
    )
    (
@@ -232,10 +582,18 @@
     (let* 
      (
       (T21Res (T21 (set4 inputList 1) functions))                  ; Sign check
-;      (T3Res (T3 T21 functions))                                  ; T3 check
-      (T3Res (N (set2 (set4 inputList nil) (cadr T21Res)) -1))
+      (T3Res (T3 T21Res functions))                                ; T3 check
      )
-      (T22 (set4 T3Res (* (cdddr T21Res) (cdddr T3Res))) functions); Factorial check
+     (cond
+      (
+       (caddr T3Res)
+       T3Res
+      )
+      (
+       T
+       (T22 (set4 T3Res (* (cdddr T21Res) (cdddr T3Res))) functions); Factorial check
+      )
+     )
     )
    )
   )
@@ -259,11 +617,7 @@
     inputList                                                 ; Return error, nothing done
    )
    (
-    (eq index (length input))                                 ; End of input
-    inputList                                                 ; Epsilon, nothing done
-   )
-   (
-    (eq #\* (char input index))                               ; If multiply
+    (eq #\* (charWOlen input index))                          ; If multiply
     (let* ((T2Res (T2 (set2 inputList (1+ index)) functions)))
      (cond
       (
@@ -278,7 +632,7 @@
     )
    )
    (
-    (eq #\/ (char input index))                               ; If divide
+    (eq #\/ (charWOlen input index))                          ; If divide
     (let* ((T2Res (T2 (set2 inputList (1+ index)) functions)))
      (cond
       (
@@ -286,7 +640,7 @@
        T2Res                                                  ; Return error, nothing done
       )
       (
-       (eq 0 (cdddr T2Res))                                   ; If denumerator equals zero
+       (= 0 (cdddr T2Res))                                   ; If denumerator equals zero
        (set3 T2Res "Division by zero.")                       ; Return error
       )
       (
@@ -297,7 +651,7 @@
     )
    )
    (
-    (eq #\^ (char input index))                               ; If power
+    (eq #\^ (charWOlen input index))                          ; If power
     (let* ((T2Res (T2 (set2 inputList (1+ index)) functions)))
      (cond
       (
@@ -305,7 +659,7 @@
        T2Res                                                  ; Return error, nothing done
       )
       (
-       (and (eq lf 0) (eq (cdddr T2Res) 0))                   ; If there is 0^0
+       (and (= lf 0) (= (cdddr T2Res) 0))                   ; If there is 0^0
        (set3 T2Res "The result of 0^0 is undefined.")         ; Return error
       )
       (
@@ -316,12 +670,16 @@
     )
    )
    (
-    (eq #\% (char input index))                               ; If modulo
+    (eq #\% (charWOlen input index))                          ; If modulo
     (let* ((T2Res (T2 (set2 inputList (1+ index)) functions)))
      (cond
       (
        (caddr T2Res)                                          ; If error
        T2Res                                                  ; Return error, nothing done
+      )
+      (
+       (= 0 (cdddr T2Res))
+       (set3 T2Res "Division by zero.")
       )
       (
        T                                                      ; Else
@@ -362,11 +720,7 @@
     inputList                                                 ; Return error, nothing done
    )
    (
-    (eq index (length input))
-    inputList                                                 ; End of input
-   )
-   (
-    (eq #\+ (char input index))                               ; If plus
+    (eq #\+ (charWOlen input index))                          ; If plus
     (let* ((T1Res (T1 (set2 inputList (1+ index)) functions)))
      (cond
       (
@@ -381,7 +735,7 @@
     )
    )
    (
-    (eq #\- (char input index))                               ; If minus
+    (eq #\- (charWOlen input index))                          ; If minus
     (let* ((T1Res (T1 (set2 inputList (1+ index)) functions)))
      (cond
       (
@@ -426,7 +780,7 @@
      (
       (caddr ERes)                                                            ; If error show error
       (let ((pointer (make-string (1+ (cadr ERes)) :initial-element #\Space)))
-       (setf (char pointer (cadr ERes)) #\^)
+       (setf (char pointer (errorIndex(cadr ERes))) #\^)
        (print input)
        (print pointer)
        (print (caddr ERes))
